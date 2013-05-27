@@ -1,41 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require 'spec_helper'
 
-class MyModel
-  include Mongoid::Document
-  include Mongoid::TaggableWithContext
-    
-  taggable
-  taggable :artists
-  taggable :albums, default: []
-end
-
-class M1
-  include Mongoid::Document
-  include Mongoid::TaggableWithContext
-  include Mongoid::TaggableWithContext::AggregationStrategy::MapReduce
-  
-  taggable
-  taggable :a, as: :artists
-end
-
-class M2
-  include Mongoid::Document
-  include Mongoid::TaggableWithContext
-  include Mongoid::TaggableWithContext::AggregationStrategy::RealTime
-  
-  taggable
-  taggable :artists
-end
-
-class M3
-  include Mongoid::Document
-  include Mongoid::TaggableWithContext
-  include Mongoid::TaggableWithContext::AggregationStrategy::RealTimeGroupBy
-
-  field :user
-  taggable group_by_field: :user
-  taggable :artists, group_by_field: :user
-end
+# TODO: test that two aggregations can point to the same collection for both realtime and mapreduce
 
 describe Mongoid::TaggableWithContext do
 
@@ -64,7 +29,7 @@ describe Mongoid::TaggableWithContext do
     end
     
     it "should set artists tags from string" do
-      @m.artists = "some new tag"
+      @m.artists = "some, new, tag"
       @m.artists.should == %w[some new tag]
     end
 
@@ -75,7 +40,7 @@ describe Mongoid::TaggableWithContext do
     
     it "should retrieve artists string" do
       @m.artists = %w[some new tags]
-      @m.artists_string.should == "some new tags"
+      @m.artists_string.should == "some, new, tags"
     end
 
     it "should strip tags before put in array" do
@@ -132,22 +97,39 @@ describe Mongoid::TaggableWithContext do
       (MyModel.artists_tagged_with("aaron").to_a - [@m1, @m3]).should be_empty
     end
   end
-  
+
+  context "separators" do
+    it "should allow a custom separator" do
+      MyModel.tag_contexts[:artists].separator.should == ', '
+    end
+    it "should use a default separator" do
+      MyModel.tag_contexts[:tags].separator.should == ' '
+    end
+    context "class alias methods" do
+      it "should allow a custom separator" do
+        MyModel.artists_separator.should == ', '
+      end
+      it "should use a default separator" do
+        MyModel.tags_separator.should == ' '
+      end
+    end
+  end
+
   context "no aggregation" do
     it "should raise AggregationStrategyMissing exception when retreiving tags" do
-      lambda{ MyModel.tags }.should raise_error(Mongoid::TaggableWithContext::AggregationStrategyMissing)
+      lambda{ MyModel.tags }.should raise_error(NoMethodError)
     end
     
     it "should raise AggregationStrategyMissing exception when retreiving tags with weights" do
-      lambda{ MyModel.tags_with_weight }.should raise_error(Mongoid::TaggableWithContext::AggregationStrategyMissing)
+      lambda{ MyModel.tags_with_weight }.should raise_error(NoMethodError)
     end
-    
   end
   
   shared_examples_for "aggregation" do
     context "retrieving index" do
       context "when there's no tags'" do
         it "should return an empty array" do
+          puts klass.to_s
           klass.tags.should == []
           klass.artists.should == []
 
@@ -329,11 +311,13 @@ describe Mongoid::TaggableWithContext do
     it_should_behave_like "aggregation"
 
     it "should generate the tags aggregation collection name correctly" do
-      klass.aggregation_collection_for(:tags).should == "m1s_tags_aggregation"
+      klass.tags_via_map_reduce_aggregation_collection.should == "m1s_tags_via_map_reduce_aggregation"
+      klass.aggregation_collection_for(:tags_via_map_reduce).should == "m1s_tags_via_map_reduce_aggregation"
     end
     
     it "should generate the artists aggregation collection name correctly" do
-      klass.aggregation_collection_for(:artists).should == "m1s_artists_aggregation"
+      klass.artists_via_map_reduce_aggregation_collection.should == "m1s_artists_via_map_reduce_aggregation"
+      klass.aggregation_collection_for(:artists_via_map_reduce).should == "m1s_artists_via_map_reduce_aggregation"
     end
   end
   
@@ -354,8 +338,8 @@ describe Mongoid::TaggableWithContext do
     let(:klass) { M3 }
     it_should_behave_like "aggregation"
 
-    it "should have artists_group_by_field value :user" do
-      klass.artists_group_by_field.should == :user
+    it "should have artists_group_by value :user" do
+      klass.artists_group_by.should == :user
     end
 
     it "should generate the tags aggregation collection name correctly" do
@@ -415,40 +399,61 @@ describe Mongoid::TaggableWithContext do
     end
   end
 
-  context "removed options" do
-    it "should throw error if :field option is specified" do
+  context "a taggregation without its taggable field" do
+    it "should raise an taggable field missing error" do
       expect do
         class Invalid
           include Mongoid::Document
           include Mongoid::TaggableWithContext
-          taggable field: :foobar
+          taggable
+          taggregation :foobar
         end
-      end.to raise_error
+      end.to raise_error(Mongoid::TaggableWithContext::Taggregation::TagContextNotFound)
     end
-    it "should throw error if :string_method option is specified" do
+  end
+
+  context "taggregation without valid taggable context" do
+    it "should be invalid" do
       expect do
-        class Invalid
+        class TaggableDefinedAfterTaggregation
           include Mongoid::Document
           include Mongoid::TaggableWithContext
-          taggable string_method: :foobar
+
+          taggable
+          taggregation :artists
         end
-      end.to raise_error
+      end.to raise_error Mongoid::TaggableWithContext::Taggregation::TagContextNotFound
     end
-    it "should throw error if GroupBy::TaggableWithContext module is included" do
-      expect do
-        class Invalid
-          include Mongoid::Document
-          include Mongoid::TaggableWithContext::GroupBy::TaggableWithContext
-        end
-      end.to raise_error
+  end
+
+  context "taggable after taggregation" do
+    context "context-specific taggregation" do
+      it "should be valid" do
+        expect do
+          class TaggableDefinedAfterSpecificTaggregation
+            include Mongoid::Document
+            include Mongoid::TaggableWithContext
+
+            taggable :a, as: :artists
+            taggregation :artists
+            taggable
+          end
+        end.to_not raise_error
+      end
     end
-    it "should throw error if GroupBy::AggregationStrategy::RealTime module is included" do
-      expect do
-        class Invalid
-          include Mongoid::Document
-          include Mongoid::TaggableWithContext::GroupBy::AggregationStrategy::RealTime
-        end
-      end.to raise_error
+    context "context-unspecific taggregation" do
+      it "should be invalid" do
+        expect do
+          class TaggableDefinedAfterGlobalTaggregation
+            include Mongoid::Document
+            include Mongoid::TaggableWithContext
+
+            taggable
+            taggregation
+            taggable :a, as: :artists
+          end
+        end.to raise_error Mongoid::TaggableWithContext::Taggable::TaggableAfterGlobalTaggregation
+      end
     end
   end
 end

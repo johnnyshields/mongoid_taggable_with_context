@@ -1,6 +1,6 @@
 # encoding: utf-8
 module Mongoid
   module TaggableWithContext
-    VERSION = '1.1.2'
+    VERSION = '2.0.0.pre.1'
   end
 end

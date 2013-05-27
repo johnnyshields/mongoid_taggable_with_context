@@ -3,7 +3,8 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'rspec'
 require 'mongoid'
-require 'mongoid_taggable_with_context.rb'
+require 'mongoid_taggable_with_context'
+Dir[File.join(File.dirname(__FILE__),'support/**/*.rb')].each {|f| require f}
 
 RSpec.configure do |config|
   config.after(:each) do
@@ -12,5 +13,5 @@ RSpec.configure do |config|
 end
 
 Mongoid.configure do |config|
-  config.connect_to("mongoid_taggable_with_context_test")
+  config.connect_to('mongoid_taggable_with_context_test')
 end
