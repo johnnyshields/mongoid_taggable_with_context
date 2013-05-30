@@ -36,11 +36,11 @@ module Mongoid::TaggableWithContext::Taggable
     # compacted/cleaned array. Stateful since String case depends on separator value.
     #
     # @param [ Object ] value Tag value of unknown type.
-    # @return [ Array ] Tag value as a formatted Array.
+    # @return [ Array or nil ] Tag value as a formatted Array.
     #
     # @since 2.0.0
     def format_tags(value)
-      clean_array(format_to_array(value))
+      value.nil? ? nil : clean_array(format_to_array(value))
     end
 
     protected
@@ -54,7 +54,7 @@ module Mongoid::TaggableWithContext::Taggable
     # @since 2.0.0
     def format_to_array(value)
       case value
-        when Array then  value
+        when Array then value
         when String then value.split(separator)
         else raise InvalidTagFormat
       end

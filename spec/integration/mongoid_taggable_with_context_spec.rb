@@ -83,6 +83,11 @@ describe Mongoid::TaggableWithContext do
       @m.tags = ["some", "", "new", "", "tags"]
       @m.tags.should == %w[some new tags]
     end
+
+    it "should allow tags to be set to nil" do
+      @m.tags = nil
+      @m.tags.should == nil
+    end
   end
 
   context "tagged_with" do
