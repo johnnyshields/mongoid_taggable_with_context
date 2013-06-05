@@ -28,18 +28,18 @@ module Mongoid::TaggableWithContext::Taggable
       context 'when value is Array' do
         let(:value){ ['foo,bar  ', ' baz ', 'baz ', '   ', ' bar', 'bar', 'baz,,,qux'] }
         it 'should remove whitespace, blanks, and duplicates' do
-          subject.format_tags(value).should == ["foo,bar", "baz", "bar", "baz,,,qux"]
+          subject.format_tags(value).should == %w(foo,bar baz bar baz,,,qux)
         end
       end
       context 'when value is String' do
         let(:value){ 'foo,bar baz,bar   baz  bar  ,  bar   baz,,,qux cat,dog' }
         it 'should split and compact the string' do
-          subject.format_tags(value).should == ["foo,bar", "baz,bar", "baz", "bar", ",", "baz,,,qux", "cat,dog"]
+          subject.format_tags(value).should == %w(foo,bar baz,bar baz bar , baz,,,qux cat,dog)
         end
         context 'when separator is explicitly set' do
           subject{ TagContext.new(separator: ',') }
           it 'should split and compact the string' do
-            subject.format_tags(value).should == ["foo", "bar baz", "bar   baz  bar", "bar   baz", "qux cat", "dog"]
+            subject.format_tags(value).should == ['foo', 'bar baz', 'bar   baz  bar', 'bar   baz', 'qux cat', 'dog']
           end
         end
       end

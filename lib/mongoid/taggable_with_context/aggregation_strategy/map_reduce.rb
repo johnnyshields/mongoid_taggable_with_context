@@ -31,9 +31,9 @@ module Mongoid::TaggableWithContext::AggregationStrategy
       rule.model.map_reduce(map, reduce).out(replace: rule.collection_name).time
     end
 
-    # Builds the 'map' mongoDB instruction to emit the tag values.
+    # Builds the 'map' MongoDB instruction to emit the tag values.
     #
-    # @return [ String ] The 'map' mongoDB instruction.
+    # @return [ String ] The 'map' MongoDB instruction.
     #
     # @since 2.0.0
     def map
@@ -47,9 +47,9 @@ module Mongoid::TaggableWithContext::AggregationStrategy
       END
     end
 
-    # Builds the 'reduce' mongoDB instruction to summarize the tag aggregation result.
+    # Builds the 'reduce' MongoDB instruction to summarize the tag aggregation result.
     #
-    # @return [ String ] The 'reduce' mongoDB instruction.
+    # @return [ String ] The 'reduce' MongoDB instruction.
     #
     # @since 2.0.0
     def reduce

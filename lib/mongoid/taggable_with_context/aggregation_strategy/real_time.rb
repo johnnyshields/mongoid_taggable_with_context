@@ -22,15 +22,15 @@ module Mongoid::TaggableWithContext::AggregationStrategy
     # adapted from https://github.com/jesuisbonbon/mongoid_taggable/commit/42feddd24dedd66b2b6776f9694d1b5b8bf6903d
     def tags_autocomplete(context, criteria, options={})
       result = rule.collection.find({tag_name_attribute.to_sym => /^#{criteria}/})
-      result = result.sort(value: -1) if options[:sort_by_count] == true
+      result = result.sort(value: -1) if options[:sort_by_count]
       result = result.limit(options[:max]) if options[:max] > 0
-      result.to_a.map{ |r| [r[tag_name_attribute], r["value"]] }
+      result.to_a.map{ |r| [r[tag_name_attribute], r['value']] }
     end
 
     protected
 
     def tag_name_attribute
-      "_id"  # TODO: WHY???? "_name"
+      '_id' # TODO: WHY???? "_name"
     end
 
     def update_tag_aggregation(document, old_tags=[], new_tags=[])

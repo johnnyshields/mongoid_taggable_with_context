@@ -35,7 +35,7 @@ module Mongoid::TaggableWithContext::AggregationStrategy
     protected
 
     # Helper method to determine if tag context field has changed in a given
-    # document (using Mongoid's dirty tracking.)
+    # document (using Mongoid dirty tracking.)
     #
     # @return [ Boolean ] Whether the tag context field has changed.
     #

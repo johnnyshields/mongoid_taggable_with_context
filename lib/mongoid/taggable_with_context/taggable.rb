@@ -37,8 +37,14 @@ module Mongoid::TaggableWithContext::Taggable
     #     taggable :keywords, separator: ' ', default: ['foobar']
     #   end
     #
-    # @param [ Symbol ] field The name of the field for tags. Defaults to :tags if not specified.
-    # @param [ Hash ] options Options for taggable behavior.
+    # @overload taggable(field, options)
+    #   Defines a taggable field as the user-specified field name
+    #   @param [ Symbol ] field The name of the field for tags.
+    #   @param [ Hash ] options Options for taggable behavior.
+    #
+    # @overload taggable(options)
+    #   Defines a taggable field named :tags
+    #   @param [ Hash ] options Options for taggable behavior.
     #
     # @option options [ String ] :separator
     #   The delimiter used when converting the tags to and from String format. Defaults to ' '
@@ -79,7 +85,7 @@ module Mongoid::TaggableWithContext::Taggable
       all_in(tag_contexts[context].name => tag_contexts[context].format_tags(tags))
     end
 
-    # Helper method to return the underlying Mongoid databaase
+    # Helper method to return the underlying Mongoid database
     # field names for all tag contexts in the Model.
     #
     # @return [ Array ] The array of database field names.

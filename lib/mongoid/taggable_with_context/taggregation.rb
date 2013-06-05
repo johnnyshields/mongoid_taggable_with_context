@@ -29,18 +29,22 @@ module Mongoid::TaggableWithContext::Taggregation
     #                  group_by: :category, scope: ->{ where(author: 'Joe') }
     #   end
     #
-    # @params [ Symbols... ] contexts
-    #   Optional list of tag context names to which to apply the rule. Applies to all
+    # @overload taggable(*contexts, options)
+    #   Creates an aggregation rule and applies it to the user-specified tag contexts.
+    #   @param [ Symbol ] contexts Optional list of tag context names to which to apply the rule. Applies to all
     #   tag contexts if not specified.
-    # @param [ Hash ] options
-    #   Options for taggregation rule behavior.
+    #   @param [ Hash ] options Options for taggregation rule behavior.
+    #
+    # @overload taggable(options)
+    #   Creates an aggregation rule for all tag contexts.
+    #   @param [ Hash ] options Options for taggregation rule behavior.
     #
     # @option options [ String ] :name
     #   The method name to identify the aggregation. Supports tokens
     #   %{context} %{strategy} and %{group_by}. Will raise DuplicateTaggregationName
     #   error if two taggregation rules have the same name.
     # @option options [ Class ] :strategy
-    #   The class of the aggregration strategy to use. Defaults to RealTime
+    #   The class of the aggregation strategy to use. Defaults to RealTime
     # @option options [ Symbol ] :group_by
     #   A field name whose value will be used to group the tag result set into buckets.
     #   Defaults to nil, i.e. do not group.
@@ -94,7 +98,7 @@ module Mongoid::TaggableWithContext::Taggregation
     # Mass-creates a set of Taggregation::Rule objects for the given
     # contexts.
     #
-    # @param [ Array<Symbol> ] context The context names to which to associate the rule.
+    # @param [ Array<Symbol> ] contexts The context names to which to associate the rule.
     # @param [ Hash ] options The taggregation rule options.
     #
     # @options option [ Symbol ] see Taggregation::Rule#initialize
@@ -131,7 +135,7 @@ module Mongoid::TaggableWithContext::Taggregation
     # Validates the taggregation rule does not have a duplicate
     # name, and if so inserts it into the tag_aggregation_rules hash
     #
-    # @param [ Rule ] options The taggregation rule to insert.
+    # @param [ Rule ] rule The taggregation rule to insert.
     #
     # @since 2.0.0
     def insert_tag_aggregation_rule(rule)
@@ -167,7 +171,7 @@ module Mongoid::TaggableWithContext::Taggregation
     # Defines all accessor methods for the taggable context at both
     # the instance and class level.
     #
-    # @param [ String ] rule_name The name of the taggregation rule.
+    # @param [ Rule ] rule The taggregation rule.
     #
     # @since 2.0.0
     def define_tag_aggregation_accessors(rule)
@@ -185,7 +189,7 @@ module Mongoid::TaggableWithContext::Taggregation
     # Create the getter method to retrieve all tags
     # of a given rule on the Model class.
     #
-    # @param [ String ] rule_name The name of the taggregation rule.
+    # @param [ String ] rule The name of the taggregation rule.
     #
     # @since 2.0.0
     def define_class_tags_getter(rule, meth)

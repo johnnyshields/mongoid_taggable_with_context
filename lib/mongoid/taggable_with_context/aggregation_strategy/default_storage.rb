@@ -1,4 +1,4 @@
-# Tag aggregation data retreival methods assuming data is stored in the database in a standard fashion
+# Tag aggregation data retrieval methods assuming data is stored in the database in a standard fashion
 
 
 
@@ -27,7 +27,7 @@ module Mongoid::TaggableWithContext::AggregationStrategy
 
 
       results = rule.collection.find(criteria).sort(tag_name_attribute.to_sym => 1)
-      results = results.to_a.map{ |t| [t[tag_name_attribute], t["value"].to_i] }
+      results = results.to_a.map{ |t| [t[tag_name_attribute], t['value'].to_i] }
       # below is from group_by
       tag_hash = {}
       results.each do |tag, weight|
@@ -49,11 +49,11 @@ module Mongoid::TaggableWithContext::AggregationStrategy
     #end
 
     def tags
-      rule.collection.find({value: {"$gt" => 0 }}).sort(_id: 1).to_a.map{ |t| t["_id"] }
+      rule.collection.find({value: {'$gt' => 0 }}).sort(_id: 1).to_a.map{ |t| t['_id'] }
     end
 
     def tags_with_weight
-      rule.collection.find({value: {"$gt" => 0 }}).sort(_id: 1).to_a.map{ |t| [t["_id"], t["value"].to_i] }
+      rule.collection.find({value: {'$gt' => 0 }}).sort(_id: 1).to_a.map{ |t| [t['_id'], t['value'].to_i] }
     end
 
     protected
@@ -65,7 +65,7 @@ module Mongoid::TaggableWithContext::AggregationStrategy
 
     def criteria(group = nil)
       criteria = {}
-      criteria[:value] = { "$gt" => 0 }
+      criteria[:value] = { '$gt' => 0 }
       criteria[:group] = rule.group_by if rule.group_by
       #criteria.merge!(rule.scope) if rule.scope # TODO ??
       criteria

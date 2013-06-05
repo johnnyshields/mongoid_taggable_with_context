@@ -148,7 +148,7 @@ end
 #    #   The raw name string for the rule, which may include the tokens
 #    #   %{context}, %{strategy}, and %{group_by}.
 #    # @option options [ Class ] :strategy
-#    #   The class of the aggregration strategy to use. Defaults to RealTime
+#    #   The class of the aggregation strategy to use. Defaults to RealTime
 #    # @option options [ Symbol ] :group_by
 #    #   A field name whose value will be used to group the tag result set into buckets.
 #    #   Defaults to nil, i.e. do not group.
