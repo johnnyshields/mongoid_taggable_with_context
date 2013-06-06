@@ -9,13 +9,11 @@ module Mongoid::TaggableWithContext::AggregationStrategy
     # The Strategy subclass should define one or more of the following methods,
     # which will be automatically triggered on the Model:
     #
-    #    - after_create(document)
-    #    - after_update(document)
-    #    - after_upsert(document)
-    #    - after_save(document)
-    #    - after_destroy(document)
-
-
+    # - after_create(document)
+    # - after_update(document)
+    # - after_upsert(document)
+    # - after_save(document)
+    # - after_destroy(document)
 
     # retrieve the list of tags
     def tags
