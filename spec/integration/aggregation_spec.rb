@@ -2,7 +2,7 @@ require 'spec_helper'
 
 # TODO: test that two aggregations can point to the same collection for both realtime and mapreduce
 
-describe Mongoid::TaggableWithContext do
+describe 'aggregation' do
 
   shared_examples_for 'aggregation' do
     context 'retrieving index' do
